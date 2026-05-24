@@ -7,11 +7,7 @@ Built as a simulation of a modern AI product operations dashboard used by startu
 ---
 
 # Live Demo
-
-🔗 Add your deployed link here
-
-Example:
-https://insightflow.vercel.app
+https://insightflow-intelligence.netlify.app/
 
 ---
 
