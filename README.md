@@ -176,7 +176,7 @@ This creates realistic PM/product operations simulations without requiring backe
 ![InsightFlow Sentiment Dashboard](sentiment.png)
 
 ## Sentiment Analytics Dashboard
-![InsightFlow Pain Point Clusters](sentiment.png)
+![InsightFlow Pain Point Clusters](pain_clustes.png)
 
 
 
