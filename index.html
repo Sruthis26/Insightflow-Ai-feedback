@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>InsightFlow — AI Product Feedback Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070810;--bg2:#0d0f1c;--bg3:#13162a;--bg4:#1a1e35;
+  --border:#ffffff0d;--border2:#ffffff16;--border3:#ffffff22;
+  --text:#eef0ff;--muted:#7c7f9a;--muted2:#4a4d66;
+  --indigo:#6366f1;--indigo-dim:#6366f11a;
+  --violet:#8b5cf6;--violet-dim:#8b5cf61a;
+  --cyan:#06b6d4;--cyan-dim:#06b6d41a;
+  --green:#10b981;--green-dim:#10b9811a;
+  --amber:#f59e0b;--amber-dim:#f59e0b1a;
+  --red:#ef4444;--red-dim:#ef44441a;
+  --pink:#ec4899;--pink-dim:#ec48991a;
+  --blue:#3b82f6;--blue-dim:#3b82f61a;
+  --r:10px;--r2:16px;--r3:20px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6}
+.app{display:flex;height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:230px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+.sb-top{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;box-shadow:0 0 20px #6366f130}
+.logo-name{font-size:18px;font-weight:800;letter-spacing:-.02em}
+.logo-name span{background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-tag{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.06em}
+.sb-status{margin:12px 12px 0;background:var(--green-dim);border:1px solid #10b98120;border-radius:var(--r);padding:8px 11px;display:flex;align-items:center;gap:7px;font-size:11px;color:var(--green);font-family:'DM Mono',monospace}
+.sb-dot{width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.sb-nav{padding:12px 8px;flex:1}
+.sb-grp{margin-bottom:4px}
+.sb-grp-lbl{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.1em;color:var(--muted2);text-transform:uppercase;padding:8px 10px 4px;display:block}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r);cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:1px;border:1px solid transparent;transition:all .15s;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--indigo-dim);color:#818cf8;border-color:#6366f118;font-weight:500}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--indigo-dim);color:#818cf8;font-size:10px;font-family:'DM Mono',monospace;padding:1px 6px;border-radius:10px}
+.sb-footer{padding:12px;border-top:1px solid var(--border)}
+.product-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px}
+.pc-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.06em;margin-bottom:4px}
+.pc-name{font-size:12px;font-weight:600}
+.pc-meta{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh}
+.topbar{padding:14px 26px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-page{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.tb-tag{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;background:var(--bg3);border:1px solid var(--border2);padding:3px 9px;border-radius:20px}
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 14px;font-size:12px;font-family:'Inter',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.tb-btn:hover{color:var(--text);border-color:var(--border3)}
+.tb-btn-primary{background:linear-gradient(135deg,var(--indigo),var(--violet));border:none;color:#fff;font-weight:600}
+.tb-btn-primary:hover{filter:brightness(1.1);color:#fff}
+
+/* ── CONTENT ── */
+.content{padding:24px 26px 60px;overflow-y:auto;overflow-x:hidden;flex:1}
+.tab-view{display:none}.tab-view.active{display:block}
+
+/* ── GLASS CARD ── */
+.glass{background:linear-gradient(135deg,#0d0f1c,#13162a);border:1px solid var(--border2);border-radius:var(--r2);backdrop-filter:blur(12px)}
+
+/* ── INPUT TAB ── */
+.input-hero{text-align:center;padding:32px 0 28px;max-width:700px;margin:0 auto}
+.ih-badge{display:inline-flex;align-items:center;gap:6px;background:var(--indigo-dim);border:1px solid #6366f125;border-radius:20px;padding:4px 14px;font-size:11px;font-family:'DM Mono',monospace;color:#818cf8;margin-bottom:16px}
+.ih-badge::before{content:'◈'}
+.ih-title{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.ih-title span{background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ih-sub{font-size:14px;color:var(--muted);line-height:1.7}
+.input-layout{display:grid;grid-template-columns:1fr 320px;gap:18px;max-width:1100px;margin:0 auto}
+.input-main{}
+.category-tabs{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.cat-tab{padding:6px 14px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
+.cat-tab:hover{color:var(--text);border-color:var(--border3)}
+.cat-tab.active{background:var(--indigo-dim);color:#818cf8;border-color:#6366f125;font-weight:500}
+.feedback-area{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:16px;outline:none;resize:vertical;min-height:260px;line-height:1.7;transition:border-color .2s}
+.feedback-area:focus{border-color:#6366f130}
+.feedback-area::placeholder{color:var(--muted2)}
+.sample-btns{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.sample-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s}
+.sample-btn:hover{border-color:#6366f130;color:#818cf8;background:var(--indigo-dim)}
+.analyze-btn{width:100%;margin-top:14px;background:linear-gradient(135deg,var(--indigo),var(--violet));border:none;border-radius:var(--r2);color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;padding:16px;cursor:pointer;transition:all .2s;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:10px}
+.analyze-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 28px #6366f130}
+.analyze-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.input-sidebar-panel{}
+.info-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:12px}
+.ic-title{font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.ic-title::before{content:'';width:3px;height:12px;background:linear-gradient(var(--indigo),var(--violet));border-radius:2px;display:inline-block}
+.ic-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
+.ic-item:last-child{border-bottom:none}
+.ic-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.upload-area{border:1px dashed var(--border2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.upload-area:hover{border-color:#6366f130;background:var(--indigo-dim)}
+.upload-icon{font-size:24px;margin-bottom:6px}
+.upload-text{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* ── LOADING ── */
+.loading-overlay{display:none;position:fixed;inset:0;background:#070810ee;z-index:100;align-items:center;justify-content:center;flex-direction:column}
+.loading-overlay.show{display:flex}
+.loading-ring{width:60px;height:60px;border:2px solid #6366f120;border-top-color:#6366f1;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.loading-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.loading-steps{display:flex;flex-direction:column;gap:6px;width:340px}
+.ls{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted2);display:flex;align-items:center;gap:8px;padding:5px 0;transition:color .3s}
+.ls.active{color:#818cf8}.ls.done{color:var(--green)}
+.ls::before{content:'○';font-size:10px;flex-shrink:0}
+.ls.active::before{content:'◉';animation:pulse 1s ease infinite}
+.ls.done::before{content:'●';color:var(--green)}
+
+/* ── SECTION HEADERS ── */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.sec-title{font-size:17px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+.sec-title-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sec-meta{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+
+/* ── KPI CARDS ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.kc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;position:relative;overflow:hidden;transition:border-color .2s}
+.kc:hover{border-color:var(--border3)}
+.kc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.kc-indigo::after{background:var(--indigo)}.kc-green::after{background:var(--green)}
+.kc-red::after{background:var(--red)}.kc-amber::after{background:var(--amber)}
+.kc-violet::after{background:var(--violet)}.kc-cyan::after{background:var(--cyan)}
+.kc-lbl{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.kc-val{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px;letter-spacing:-.02em}
+.kc-sub{font-size:11px;color:var(--muted)}
+
+/* ── CHARTS ── */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.cc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px}
+.cc.full{grid-column:1/-1}
+.cc-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.cc-title{font-size:13px;font-weight:600}
+.cc-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.pill{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:20px;border:1px solid;background:transparent;white-space:nowrap}
+.pill-g{color:var(--green);border-color:#10b98130}
+.pill-r{color:var(--red);border-color:#ef444430}
+.pill-i{color:#818cf8;border-color:#6366f130}
+.pill-a{color:var(--amber);border-color:#f59e0b30}
+
+/* ── SENTIMENT BARS ── */
+.sent-bar-wrap{margin-bottom:12px}
+.sb-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.sb-lbl{font-size:12px;font-weight:500}
+.sb-pct{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted)}
+.sb-bg{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.sb-fill{height:100%;border-radius:4px;transition:width 1.2s ease}
+
+/* ── PAIN CLUSTERS ── */
+.cluster-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.cluster-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.cluster-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:0 0 0 0}
+.cluster-card.sev-high::before{background:var(--red)}
+.cluster-card.sev-med::before{background:var(--amber)}
+.cluster-card.sev-low::before{background:var(--green)}
+.cluster-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.cl-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px}
+.cl-name{font-size:13px;font-weight:600}
+.cl-sev{font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:4px;flex-shrink:0}
+.cl-sev.high{background:var(--red-dim);color:var(--red);border:1px solid #ef444420}
+.cl-sev.med{background:var(--amber-dim);color:var(--amber);border:1px solid #f59e0b20}
+.cl-sev.low{background:var(--green-dim);color:var(--green);border:1px solid #10b98120}
+.cl-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.cl-stat{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace}
+.cl-quote{font-size:11px;color:var(--muted);line-height:1.5;font-style:italic;border-left:2px solid var(--border2);padding-left:8px;margin-top:6px}
+.cl-churn{font-size:10px;font-family:'DM Mono',monospace;margin-top:8px;display:flex;align-items:center;gap:5px}
+
+/* ── FEATURE REQUESTS ── */
+.feat-table-wrap{overflow-x:auto;border-radius:var(--r2);border:1px solid var(--border)}
+.feat-table{width:100%;border-collapse:collapse;font-size:13px}
+.feat-table thead tr{background:var(--bg3)}
+.feat-table th{padding:10px 13px;text-align:left;font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border2);white-space:nowrap}
+.feat-table td{padding:12px 13px;border-bottom:1px solid var(--border);vertical-align:middle}
+.feat-table tr:last-child td{border-bottom:none}
+.feat-table tr:hover td{background:#ffffff03}
+.feat-name{font-size:13px;font-weight:500}
+.feat-desc{font-size:11px;color:var(--muted);margin-top:1px}
+.score-ring-sm{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;font-size:11px;font-weight:700;font-family:'DM Mono',monospace}
+.moscow-badge{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:20px;border:1px solid;white-space:nowrap}
+.moscow-must{color:#ef4444;border-color:#ef444428;background:var(--red-dim)}
+.moscow-should{color:var(--amber);border-color:#f59e0b28;background:var(--amber-dim)}
+.moscow-could{color:#818cf8;border-color:#6366f128;background:var(--indigo-dim)}
+.moscow-wont{color:var(--muted);border-color:var(--border2);background:var(--bg3)}
+.sprint-badge{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:4px;white-space:nowrap}
+
+/* ── PERSONAS ── */
+.persona-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px;margin-bottom:18px}
+.persona-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;transition:border-color .2s}
+.persona-card:hover{border-color:var(--border2)}
+.persona-emoji{font-size:28px;margin-bottom:12px}
+.persona-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.persona-role{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:12px}
+.persona-attr{font-size:12px;color:var(--muted);margin-bottom:5px;line-height:1.5}
+.persona-attr strong{color:var(--text);font-weight:500}
+.persona-churn-bar{height:6px;background:var(--bg3);border-radius:3px;margin-top:10px;overflow:hidden}
+.persona-churn-fill{height:100%;border-radius:3px}
+
+/* ── ROADMAP ── */
+.kanban{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.kanban-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px}
+.kanban-hd{font-size:12px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.kanban-dot{width:8px;height:8px;border-radius:50%}
+.kanban-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.kanban-item:hover{border-color:var(--border2)}
+.ki-title{font-size:12px;font-weight:500;margin-bottom:3px}
+.ki-meta{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}
+.ki-impact{font-size:10px;font-family:'DM Mono',monospace;display:inline-flex;align-items:center;gap:3px}
+
+/* ── PRD ── */
+.prd-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.prd-hd{background:var(--bg3);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.prd-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.prd-actions{display:flex;gap:7px}
+.prd-btn{background:none;border:1px solid var(--border2);color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s}
+.prd-btn:hover{color:var(--text);border-color:var(--border3)}
+.prd-body{padding:20px 22px;font-size:13px;color:var(--muted);line-height:1.85;white-space:pre-wrap}
+.prd-body strong{color:var(--text);font-weight:600}
+
+/* ── HEALTH SCORE ── */
+.health-hero{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:28px;display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-bottom:18px;position:relative;overflow:hidden}
+.health-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,#6366f112,transparent 70%);pointer-events:none}
+.health-ring{position:relative;width:120px;height:120px;flex-shrink:0}
+.health-ring svg{transform:rotate(-90deg)}
+.health-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.health-score-num{font-size:32px;font-weight:900;letter-spacing:-.02em}
+.health-score-lbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.06em}
+.health-body{flex:1}
+.health-verdict{font-size:18px;font-weight:800;margin-bottom:6px;letter-spacing:-.01em}
+.health-summary{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.health-tags{display:flex;gap:7px;flex-wrap:wrap}
+
+/* ── INSIGHT FEED ── */
+.feed-item{display:flex;gap:13px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+.feed-content{}
+.feed-text{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:4px}
+.feed-meta{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.feed-impact{font-weight:600}
+
+/* ── CHURN RISK ── */
+.churn-risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:18px}
+.cr-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px}
+.cr-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.cr-sub{font-size:11px;color:var(--muted);margin-bottom:10px}
+.cr-bar-bg{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.cr-bar-fill{height:100%;border-radius:4px}
+.cr-pct{font-size:20px;font-weight:800;font-family:'DM Mono',monospace}
+.urgency-badge{font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:4px;border:1px solid}
+
+/* ── REC TABLE (shared with dashboard) ── */
+.rec-section{margin-top:20px}
+.rec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:7px}
+.rec-title-row{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px}
+.rec-title-row::before{content:'◈';color:var(--indigo);font-size:12px}
+.rec-table-wrap{overflow-x:auto;border-radius:var(--r2);border:1px solid var(--border)}
+.rec-table{width:100%;border-collapse:collapse;font-size:13px}
+.rec-table thead tr{background:var(--bg3)}
+.rec-table th{padding:10px 13px;text-align:left;font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border2);white-space:nowrap}
+.rec-table td{padding:12px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+.rec-table tr:last-child td{border-bottom:none}
+.rec-table tr:hover td{background:#ffffff03}
+.rec-problem{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.rec-problem-sub{font-size:11px;color:var(--muted);line-height:1.4}
+.rec-rec{font-size:13px;color:var(--text);line-height:1.5}
+.rec-rec em{font-style:normal;color:var(--cyan);font-size:11px;font-family:'DM Mono',monospace;display:block;margin-top:2px}
+.impact-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:20px;border:1px solid;white-space:nowrap;font-weight:500}
+.imp-high{color:var(--green);border-color:#10b98130;background:var(--green-dim)}
+.imp-med{color:var(--amber);border-color:#f59e0b30;background:var(--amber-dim)}
+.imp-low{color:#818cf8;border-color:#6366f130;background:var(--indigo-dim)}
+.pri-badge{display:inline-flex;font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;border:1px solid;white-space:nowrap}
+.pri-p1{color:var(--red);border-color:#ef444430;background:var(--red-dim)}
+.pri-p2{color:var(--amber);border-color:#f59e0b30;background:var(--amber-dim)}
+.pri-p3{color:#818cf8;border-color:#6366f130;background:var(--indigo-dim)}
+.pri-p4{color:var(--muted);border-color:var(--border2);background:var(--bg3)}
+.outcome-num{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1px}
+.outcome-text{font-size:11px;color:var(--muted);line-height:1.4}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 24px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:14px;opacity:.5}
+.empty-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
+.empty-sub{font-size:13px;line-height:1.6;max-width:320px;margin:0 auto}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border3);border-radius:3px}
+
+@media(max-width:900px){
+  .sidebar{width:52px}.sb-top>div:not(.sb-logo),.sb-grp-lbl,.sb-footer,.sb-status,.logo-name,.logo-tag,.nav-badge{display:none}
+  .nav-item span:not(.nav-icon){display:none}.nav-item{justify-content:center;padding:10px}
+  .input-layout{grid-template-columns:1fr}.chart-grid{grid-template-columns:1fr}
+  .cluster-grid,.kanban,.churn-risk-grid,.persona-grid{grid-template-columns:1fr}
+  .content{padding:14px 14px 40px}.topbar{padding:11px 14px}
+  .health-hero{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo">
+      <div class="logo-mark">◈</div>
+      <div><div class="logo-name">Insight<span>Flow</span></div><div class="logo-tag">AI Feedback OS</div></div>
+    </div>
+    <div class="sb-status"><div class="sb-dot"></div>AI Engine Ready</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-grp">
+      <span class="sb-grp-lbl">Workspace</span>
+      <div class="nav-item active" id="nav-input" onclick="showView('input')"><span class="nav-icon">⊕</span><span>Input Feedback</span></div>
+    </div>
+    <div class="sb-grp">
+      <span class="sb-grp-lbl">Analysis</span>
+      <div class="nav-item" id="nav-summary" onclick="showView('summary')"><span class="nav-icon">⬢</span><span>Executive Summary</span></div>
+      <div class="nav-item" id="nav-sentiment" onclick="showView('sentiment')"><span class="nav-icon">◎</span><span>Sentiment Analytics</span></div>
+      <div class="nav-item" id="nav-clusters" onclick="showView('clusters')"><span class="nav-icon">⊞</span><span>Pain Point Clusters</span></div>
+      <div class="nav-item" id="nav-features" onclick="showView('features')"><span class="nav-icon">★</span><span>Feature Requests</span><span class="nav-badge">8</span></div>
+    </div>
+    <div class="sb-grp">
+      <span class="sb-grp-lbl">Intelligence</span>
+      <div class="nav-item" id="nav-personas" onclick="showView('personas')"><span class="nav-icon">◈</span><span>User Personas</span></div>
+      <div class="nav-item" id="nav-roadmap" onclick="showView('roadmap')"><span class="nav-icon">→</span><span>Roadmap Generator</span></div>
+      <div class="nav-item" id="nav-churnrisk" onclick="showView('churnrisk')"><span class="nav-icon">⚠</span><span>Churn Risk</span></div>
+      <div class="nav-item" id="nav-health" onclick="showView('health')"><span class="nav-icon">◉</span><span>Product Health</span></div>
+    </div>
+    <div class="sb-grp">
+      <span class="sb-grp-lbl">Output</span>
+      <div class="nav-item" id="nav-prd" onclick="showView('prd')"><span class="nav-icon">⬡</span><span>PRD Generator</span></div>
+      <div class="nav-item" id="nav-feed" onclick="showView('feed')"><span class="nav-icon">◈</span><span>Insight Feed</span><span class="nav-badge">12</span></div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="product-card">
+      <div class="pc-label">ACTIVE PRODUCT</div>
+      <div class="pc-name" id="sb-product-name">StreamFlow Music</div>
+      <div class="pc-meta" id="sb-feedback-count">0 feedback items loaded</div>
+    </div>
+  </div>
+</nav>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <div class="loading-title">AI Analysis Running…</div>
+  <div class="loading-sub">Processing your feedback with InsightFlow AI</div>
+  <div class="loading-steps">
+    <div class="ls" id="al1">Parsing and cleaning feedback data</div>
+    <div class="ls" id="al2">Running sentiment analysis</div>
+    <div class="ls" id="al3">Clustering pain points</div>
+    <div class="ls" id="al4">Extracting feature requests</div>
+    <div class="ls" id="al5">Detecting user personas</div>
+    <div class="ls" id="al6">Scoring churn risk</div>
+    <div class="ls" id="al7">Generating product health score</div>
+    <div class="ls" id="al8">Compiling executive summary</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-page" id="tbTitle">Input Feedback</div>
+      <div class="tb-tag" id="tbTag">0 items</div>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="exportReport()">↓ Export Report</button>
+      <button class="tb-btn" onclick="shareInsights()">↗ Share Insights</button>
+      <button class="tb-btn tb-btn-primary" onclick="showView('input')">+ New Analysis</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- INPUT VIEW -->
+    <div class="tab-view active" id="view-input">
+      <div class="input-hero">
+        <div class="ih-badge">AI Feedback Intelligence Platform</div>
+        <h1 class="ih-title">Turn Raw Feedback Into <span>Product Decisions</span></h1>
+        <p class="ih-sub">Paste app reviews, support tickets, survey responses, or feature requests. InsightFlow AI analyses everything and generates actionable product intelligence in seconds.</p>
+      </div>
+      <div class="input-layout">
+        <div class="input-main">
+          <div class="category-tabs">
+            <button class="cat-tab active" onclick="setCat('reviews',this)">📱 App Reviews</button>
+            <button class="cat-tab" onclick="setCat('survey',this)">📋 Survey Responses</button>
+            <button class="cat-tab" onclick="setCat('features',this)">⭐ Feature Requests</button>
+          </div>
+          <textarea class="feedback-area" id="feedbackInput" placeholder="Paste your user feedback here…
+
+Example:
+ 'The app keeps crashing when I try to download songs offline. Very frustrating after paying for premium.'
+"></textarea>
+          <div class="sample-btns">
+            <span style="font-size:11px;color:var(--muted);margin-right:4px">Load sample:</span>
+            <button class="sample-btn" onclick="loadSample('music')">🎵 Music</button>
+            <button class="sample-btn" onclick="loadSample('fintech')">💳 FinTech</button>
+            <button class="sample-btn" onclick="loadSample('saas')">⚡ SaaS</button>
+            <button class="sample-btn" onclick="loadSample('cashback')">💰 Cashback</button>
+          </div>
+          <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+            <span>⬢</span> Analyse Feedback with AI
+          </button>
+        </div>
+        <div class="input-sidebar-panel">
+          <div class="upload-area" onclick="simulateUpload()">
+            <div class="upload-icon">📂</div>
+            <div class="upload-text"><strong style="color:var(--text)">Upload CSV or TXT</strong><br>Drag & drop or click to browse<br><span style="font-size:10px;color:var(--muted2)">Simulated — demo only</span></div>
+          </div>
+          <div class="info-card">
+            <div class="ic-title">What InsightFlow Analyses</div>
+            <div class="ic-item"><span class="ic-dot" style="background:var(--green)"></span>Sentiment (positive/neutral/negative)</div>
+            <div class="ic-item"><span class="ic-dot" style="background:var(--indigo)"></span>Pain point clustering</div>
+            <div class="ic-item"><span class="ic-dot" style="background:var(--violet)"></span>Feature request extraction</div>
+            <div class="ic-item"><span class="ic-dot" style="background:var(--cyan)"></span>User persona detection</div>
+            <div class="ic-item"><span class="ic-dot" style="background:var(--amber)"></span>Churn risk prediction</div>
+            <div class="ic-item"><span class="ic-dot" style="background:var(--red)"></span>Product health scoring</div>
+            <div class="ic-item"><span class="ic-dot" style="background:var(--pink)"></span>Roadmap recommendations</div>
+            <div class="ic-item"><span class="ic-dot" style="background:#6366f1"></span>PRD auto-generation</div>
+          </div>
+      </div><!-- /input-sidebar-panel -->
+    </div><!-- /input-layout -->
+    </div><!-- /view-input -->
+
+    <!-- SUMMARY VIEW -->
+    <div class="tab-view" id="view-summary">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--indigo-dim)">⬢</div>Executive Summary</div>
+        <div class="sec-meta" id="summaryMeta">AI-generated · Based on feedback analysis</div>
+      </div>
+      <div id="summaryContent"><div class="empty"><div class="empty-icon">⬢</div><div class="empty-title">No analysis yet</div><div class="empty-sub">Load sample feedback or paste your own and click Analyse Feedback.</div></div></div>
+    </div>
+
+    <!-- SENTIMENT VIEW -->
+    <div class="tab-view" id="view-sentiment">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--green-dim)">◎</div>Sentiment Analytics</div>
+        <div class="sec-meta" id="sentimentMeta">Emotion breakdown · Satisfaction score</div>
+      </div>
+      <div id="sentimentContent"><div class="empty"><div class="empty-icon">◎</div><div class="empty-title">No analysis yet</div><div class="empty-sub">Run an analysis to see sentiment breakdown.</div></div></div>
+    </div>
+
+    <!-- CLUSTERS VIEW -->
+    <div class="tab-view" id="view-clusters">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--red-dim)">⊞</div>Pain Point Clusters</div>
+        <div class="sec-meta" id="clusterMeta">AI-grouped complaint categories</div>
+      </div>
+      <div id="clustersContent"><div class="empty"><div class="empty-icon">⊞</div><div class="empty-title">No clusters yet</div><div class="empty-sub">Run an analysis to see AI-clustered pain points.</div></div></div>
+    </div>
+
+    <!-- FEATURES VIEW -->
+    <div class="tab-view" id="view-features">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--amber-dim)">★</div>Feature Request Intelligence</div>
+        <div class="sec-meta">RICE scoring · MoSCoW · Priority matrix</div>
+      </div>
+      <div id="featuresContent"><div class="empty"><div class="empty-icon">★</div><div class="empty-title">No features extracted yet</div><div class="empty-sub">Run an analysis to extract and prioritise feature requests.</div></div></div>
+    </div>
+
+    <!-- PERSONAS VIEW -->
+    <div class="tab-view" id="view-personas">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--violet-dim)">◈</div>User Persona Detection</div>
+        <div class="sec-meta">AI-identified user segments from feedback patterns</div>
+      </div>
+      <div id="personasContent"><div class="empty"><div class="empty-icon">◈</div><div class="empty-title">No personas detected yet</div><div class="empty-sub">Run an analysis to identify user segments.</div></div></div>
+    </div>
+
+    <!-- ROADMAP VIEW -->
+    <div class="tab-view" id="view-roadmap">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--cyan-dim)">→</div>Roadmap Generator</div>
+        <div class="sec-meta">Immediate Fixes · Next Sprint · Long-term</div>
+      </div>
+      <div id="roadmapContent"><div class="empty"><div class="empty-icon">→</div><div class="empty-title">No roadmap yet</div><div class="empty-sub">Run an analysis to generate a prioritised roadmap.</div></div></div>
+    </div>
+
+    <!-- CHURN RISK VIEW -->
+    <div class="tab-view" id="view-churnrisk">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--red-dim)">⚠</div>Churn Risk Analysis</div>
+        <div class="sec-meta">Predicted churn drivers · Retention opportunities</div>
+      </div>
+      <div id="churnriskContent"><div class="empty"><div class="empty-icon">⚠</div><div class="empty-title">No churn analysis yet</div><div class="empty-sub">Run an analysis to predict churn risks.</div></div></div>
+    </div>
+
+    <!-- HEALTH VIEW -->
+    <div class="tab-view" id="view-health">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--indigo-dim)">◉</div>Product Health Score</div>
+        <div class="sec-meta">Overall product score · Feature-market fit</div>
+      </div>
+      <div id="healthContent"><div class="empty"><div class="empty-icon">◉</div><div class="empty-title">No health score yet</div><div class="empty-sub">Run an analysis to generate your product health score.</div></div></div>
+    </div>
+
+    <!-- PRD VIEW -->
+    <div class="tab-view" id="view-prd">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--violet-dim)">⬡</div>AI PRD Generator</div>
+        <div class="sec-meta">Auto-generated from top pain point</div>
+      </div>
+      <div id="prdContent"><div class="empty"><div class="empty-icon">⬡</div><div class="empty-title">No PRD generated yet</div><div class="empty-sub">Run an analysis to auto-generate a mini PRD.</div></div></div>
+    </div>
+
+    <!-- INSIGHT FEED VIEW -->
+    <div class="tab-view" id="view-feed">
+      <div class="sec-hd">
+        <div class="sec-title"><div class="sec-title-icon" style="background:var(--cyan-dim)">◈</div>AI Insight Feed</div>
+        <div class="sec-meta">Live intelligence · Pattern detection</div>
+      </div>
+      <div id="feedContent"><div class="empty"><div class="empty-icon">◈</div><div class="empty-title">No insights yet</div><div class="empty-sub">Run an analysis to generate your insight feed.</div></div></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+
+// SAMPLE DATASETS
+
+const SAMPLES = {
+  music:`The app crashes every time I try to download songs for offline playback. I'm on Android 13 and it's been happening for 2 weeks. Paid for premium and can't even use the core feature.
+OTP login is a nightmare. Takes 40+ seconds to arrive and sometimes never does. I've missed my morning commute music 3 times because of this.
+Love the Discover Weekly! Best music recommendations I've ever had from any streaming app. Really understands my taste.
+Please add a sleep timer. I fall asleep to music every night and wake up 3 hours later with the phone hot and battery dead.
+The family plan is confusing. My wife can't figure out how to use her account even after 2 weeks. The UX for family management is terrible.
+Why does the app show ads between songs on premium? That completely defeats the purpose. I'm switching to a competitor.
+Offline mode is broken on iOS 17. Songs download but won't play when I turn off WiFi.
+I've been a subscriber for 3 years. The new UI update completely ruined my workflow. Please add an option to go back to the old layout.
+The podcast section has almost nothing in my regional language. Would love more Tamil and Telugu content.
+Super fast loading compared to competitors. The UI is beautiful. Worth every penny.
+Please add collaborative playlists. My friends and I are constantly sharing music and this would be the perfect feature.
+Notifications are way too aggressive. I get 5-6 push notifications per day even with most turned off.
+The student discount is amazing. Highly recommend to any student.
+Audio quality on Bluetooth is noticeably worse than competitors. I can hear the compression artifacts.
+I want to see lyrics while songs are playing in the car view. Currently have to switch views which is dangerous while driving.
+The recommendation algorithm stopped working well after I skipped a few songs. It seems to have learned the wrong preferences.
+Please add a proper equalizer. The existing sound settings are too basic for audiophiles.
+The app uses 800MB of storage even after I clear the cache. Something is wrong with the storage management.
+Why was the queue feature removed in the last update? This was my most-used feature.
+5 stars. Nothing comes close to this for music discovery.`,
+
+  fintech:`Transaction failed but amount was debited. Still waiting for refund after 5 days. This is my salary and I'm struggling financially.
+KYC verification keeps rejecting my documents even though they're clearly valid. Customer support takes 3 days to respond.
+The cashback never arrives on time. It says 3-5 business days but it's been 3 weeks for my last 3 transactions.
+Interest rates are confusing. I signed up thinking it was 0% and then got charged 24% APR. Very misleading.
+The app is so intuitive. Transferred money to 8 people in under 2 minutes. Incredible UX.
+Please add UPI autopay for recurring bills. I have to manually pay 6 subscriptions every month.
+The credit score feature is broken. Shows a score 200 points lower than my actual CIBIL score.
+I've been locked out of my account for 4 days. No way to reach support except email which hasn't responded.
+Fraud alert system is too aggressive. Blocked my card at a legitimate restaurant. Had to call in front of everyone.
+Love the spend analytics. Really helped me cut my monthly spending by 15%.
+The app crashes on iPhone 15 Pro Max. Happens every time I try to open statements.
+Please add a feature to split bills with friends. Currently have to screenshot and manually calculate.
+International transfers are extremely slow. Took 4 days to reach a US account. Competitors do it in hours.
+The virtual card feature is brilliant. Use it for all online shopping now.
+Why do I need to re-enter my MPIN every single time? The biometric login was removed without explanation.
+Reward points expire too quickly. Lost 5000 points because the expiry was hidden in fine print.
+The investment section UI is confusing. I accidentally bought mutual funds when I meant to set up a SIP.
+Add dark mode please. Banking at night is blinding.
+The statement download is broken on Android. PDF comes out corrupted every time.
+Best fintech app in India. Customer support is also great — my query was resolved in 20 minutes.`,
+
+  saas:`The bulk export feature only works for up to 500 records. We have 50,000 records and it's completely unusable at this scale.
+Integrations with Salesforce keep breaking. The sync fails silently and we only notice when data is missing days later.
+The new dashboard is beautiful but performance is terrible. Takes 8 seconds to load on a standard connection.
+Onboarding flow is excellent. Got our 15-person team up and running in under 2 hours. Very intuitive.
+Please add role-based access control (RBAC). We can't invite clients to our workspace because they'd see everything.
+The API rate limits are too restrictive. We're hitting limits during normal business hours with a mid-tier plan.
+SSO/SAML setup documentation is outdated. Spent 2 days trying to configure it with our identity provider.
+Billing is opaque. Got charged for seats I deleted 2 months ago. Finance team was not happy.
+The mobile app is missing critical features that the desktop has. Can't approve workflows on mobile.
+Best project management tool I've used in 10 years of product management. The AI suggestions are exceptional.
+Please add time zone support for scheduling. Our team is across 8 time zones and scheduling is a nightmare.
+The search functionality is too basic. Can't search within specific date ranges or filter by custom fields.
+I've been using you for 18 months. The recent price increase of 40% without feature additions is hard to justify.
+Two-factor authentication options are limited. Only SMS supported — no TOTP apps or hardware keys.
+The Gantt chart view would be perfect if it exported properly. The Excel export is missing half the data.
+Webhook reliability is inconsistent. About 5% of webhooks fail silently. No retry mechanism or failure alerts.
+Please add a proper audit log. Compliance requires us to track all data access and we can't do that currently.
+The customer support response time has degraded significantly. Used to be same-day, now 3-4 days.
+Commenting on tasks is broken. Notifications for mentions don't arrive reliably.
+Switched from a competitor 6 months ago. Best decision. The workflow automation saved us 10 hours a week.`,
+
+  cashback:`My cashback from the Flipkart sale 3 weeks ago still hasn't credited. It says "processing" forever. ₹450 is not a small amount.
+The app shows cashback offers that have already expired. The offer dates shown in the app are completely wrong.
+Referral bonus never arrived even after my friend made his first purchase using my link. Support just sends automated replies.
+Instant cashback on food delivery is excellent. Gets credited within minutes. Love it.
+The wallet withdrawal is broken. Been trying to transfer ₹1200 to my bank for 10 days. The OTP screen freezes.
+Why does the app need access to my contacts and camera to show cashback offers? Excessive permissions.
+The category filters in the offers section are useless. Clicking "Electronics" shows me grocery deals.
+I've saved ₹8000 in 6 months using this app. Genuinely one of the best financial apps I've used.
+Please add a cashback history export. I need it for my expense tracking but there's no download option.
+The app shows an offer with 10% cashback. At checkout it gives only 1%. This is deceptive advertising.
+Notifications for offer expiry would be very helpful. I miss deals because I didn't know they were ending soon.
+The points to cashback conversion rate changed without notice. I had 10,000 points expecting ₹100, got ₹40.
+Customer support chat is AI-only and useless. I need to talk to a human for my refund issue.
+The app UI is beautiful but so slow. Takes 12 seconds to open on a mid-range Android phone.
+Add a price comparison feature. Show me when an item is cheaper on another platform.
+My account got blocked for suspicious activity but I was just using it normally. Took 2 weeks to unblock.
+Please add a proper search bar for finding specific offers. Currently I have to browse through hundreds of cards.
+Cashback for travel bookings is much better than competitors. Saved ₹3000 on a recent flight.
+The app crashes when I share an offer to WhatsApp. Happens every single time.
+Gold membership perks are not clearly explained. I paid for it thinking I'd get more but nothing changed.`
+};
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let analysisData = null;
+let currentCategory = 'reviews';
+const CH = {};
+
+function mkChart(id,cfg){
+  if(CH[id]){try{CH[id].destroy();}catch(e){}delete CH[id];}
+  const el=document.getElementById(id);if(!el)return null;
+  CH[id]=new Chart(el,cfg);return CH[id];
+}
+const GR={color:'#ffffff06'};
+const TK={color:'#555762',font:{size:11}};
+
+// ══════════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════════
+const VIEW_NAMES={input:'Input Feedback',summary:'Executive Summary',sentiment:'Sentiment Analytics',clusters:'Pain Point Clusters',features:'Feature Requests',personas:'User Personas',roadmap:'Roadmap Generator',churnrisk:'Churn Risk Analysis',health:'Product Health Score',prd:'PRD Generator',feed:'Insight Feed'};
+
+function showView(id){
+  document.querySelectorAll('.tab-view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  document.getElementById('tbTitle').textContent=VIEW_NAMES[id]||id;
+  // re-render charts when switching to views
+  if(analysisData){
+    if(id==='sentiment') setTimeout(()=>renderSentimentCharts(),100);
+  }
+}
+
+function setCat(cat,btn){
+  currentCategory=cat;
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function loadSample(key){
+  document.getElementById('feedbackInput').value=SAMPLES[key]||'';
+  const names={music:'StreamFlow Music',fintech:'PayEdge FinTech',saas:'FlowWork SaaS',cashback:'CashKaro Rewards'};
+  document.getElementById('sb-product-name').textContent=names[key]||key;
+}
+
+function simulateUpload(){
+  const el=document.getElementById('feedbackInput');
+  if(!el.value.trim()) loadSample('music');
+  else alert('Upload simulated — using current text area content.');
+}
+
+// ══════════════════════════════════════════════
+// ANALYSIS ENGINE
+// ══════════════════════════════════════════════
+function runAnalysis(){
+  const text=document.getElementById('feedbackInput').value.trim();
+  if(!text){alert('Please paste some feedback or load a sample dataset first.');return;}
+  const lines=text.split('\n').filter(l=>l.trim().length>10);
+  if(lines.length<3){alert('Please add at least 3 feedback items for a meaningful analysis.');return;}
+
+  document.getElementById('loadingOverlay').classList.add('show');
+  const steps=['al1','al2','al3','al4','al5','al6','al7','al8'];
+  let si=0;
+  const t=setInterval(()=>{
+    if(si>0) document.getElementById(steps[si-1]).classList.remove('active');
+    if(si<steps.length){document.getElementById(steps[si]).classList.add('active');si++;}
+    else clearInterval(t);
+  },400);
+
+  setTimeout(()=>{
+    clearInterval(t);
+    steps.forEach(id=>{const el=document.getElementById(id);el.classList.remove('active');el.classList.add('done');});
+    analysisData=generateAnalysis(text,lines);
+    document.getElementById('sb-feedback-count').textContent=`${lines.length} feedback items analysed`;
+    document.getElementById('tbTag').textContent=`${lines.length} items`;
+    renderAll(analysisData);
+    setTimeout(()=>{
+      document.getElementById('loadingOverlay').classList.remove('show');
+      showView('summary');
+    },600);
+  },3400);
+}
+
+// ══════════════════════════════════════════════
+// SMART ANALYSIS GENERATOR
+// ══════════════════════════════════════════════
+function generateAnalysis(text,lines){
+  const t=text.toLowerCase();
+  // Detect product type
+  const isFintech=t.includes('cashback')||t.includes('transaction')||t.includes('payment')||t.includes('kyc')||t.includes('upi');
+  const isSaas=t.includes('api')||t.includes('integration')||t.includes('saml')||t.includes('rbac')||t.includes('webhook');
+  const isCashback=t.includes('cashback')&&t.includes('offer')&&t.includes('wallet');
+  const productName=isCashback?'CashKaro Rewards':isSaas?'FlowWork SaaS':isFintech?'PayEdge FinTech':'StreamFlow Music';
+
+  // Sentiment
+  const posWords=['love','great','excellent','amazing','best','perfect','brilliant','fantastic','easy','fast','simple','intuitive','helpful','good','wonderful','saved'];
+  const negWords=['crash','broken','fail','terrible','awful','worst','slow','never','stuck','useless','missing','wrong','bug','error','frustrated','annoyed','deceptive','misleading','disappointed'];
+  let pos=0,neg=0,neu=0;
+  lines.forEach(l=>{
+    const lower=l.toLowerCase();
+    const p=posWords.filter(w=>lower.includes(w)).length;
+    const n=negWords.filter(w=>lower.includes(w)).length;
+    if(p>n)pos++;else if(n>p)neg++;else neu++;
+  });
+  const total=pos+neg+neu||1;
+  const posPct=Math.round(pos/total*100);
+  const negPct=Math.round(neg/total*100);
+  const neuPct=100-posPct-negPct;
+  const satScore=Math.round(posPct*0.7+neuPct*0.4);
+
+  // Pain clusters
+  const clusters=isFintech?[
+    {name:'Transaction & Refund Failures',sev:'high',freq:34,segment:'All Users',churnRisk:'Very High',quote:'Transaction failed but amount was debited. Still waiting for refund after 5 days.',samples:['Refund delays >5 days','Silent transaction failures','Duplicate charges']},
+    {name:'KYC & Verification Issues',sev:'high',freq:28,segment:'New Users',churnRisk:'High',quote:'KYC keeps rejecting my documents. Support takes 3 days to respond.',samples:['Document rejection loops','Slow KYC processing','Support unresponsive']},
+    {name:'Cashback/Reward Delays',sev:'high',freq:26,segment:'Active Users',churnRisk:'High',quote:'Cashback says 3-5 days but it\'s been 3 weeks for my last 3 transactions.',samples:['Cashback not credited','Offer mismatch at checkout','Points expiry issues']},
+    {name:'App Performance & Crashes',sev:'med',freq:18,segment:'Android Users',churnRisk:'Medium',quote:'The app crashes every time I try to open my statements.',samples:['Crash on statements','Slow loading','PDF export broken']},
+    {name:'Misleading Offers / Pricing',sev:'med',freq:15,segment:'New Users',churnRisk:'High',quote:'Signed up thinking 0% APR. Got charged 24%. Very misleading.',samples:['Hidden fees','Offer terms unclear','Rate bait-and-switch']},
+    {name:'Account Security & Lockouts',sev:'low',freq:9,segment:'Power Users',churnRisk:'Medium',quote:'Locked out for 4 days. No way to reach support except email.',samples:['Account lockouts','Aggressive fraud detection','Limited 2FA options']},
+  ]:isSaas?[
+    {name:'Integration & API Failures',sev:'high',freq:38,segment:'Enterprise Users',churnRisk:'Very High',quote:'Salesforce integration breaks silently. We only notice when data is missing.',samples:['Silent sync failures','API rate limits too low','Webhook unreliability']},
+    {name:'Performance & Scalability',sev:'high',freq:31,segment:'Large Teams',churnRisk:'High',quote:'Bulk export broken above 500 records. We have 50,000.',samples:['Slow dashboard load','Export limits','Search performance']},
+    {name:'Access Control & Permissions',sev:'high',freq:24,segment:'Team Admins',churnRisk:'High',quote:'Can\'t invite clients because they\'d see everything. Need RBAC.',samples:['No RBAC','Audit log missing','SSO setup broken']},
+    {name:'Billing & Pricing Issues',sev:'med',freq:20,segment:'Finance Teams',churnRisk:'High',quote:'Charged for deleted seats for 2 months. Finance team was not happy.',samples:['Surprise charges','40% price increase','Unclear billing']},
+    {name:'Mobile App Gaps',sev:'med',freq:17,segment:'Remote Workers',churnRisk:'Medium',quote:'Can\'t approve workflows on mobile. Critical feature missing.',samples:['Feature parity gap','Mobile crashes','Notification issues']},
+    {name:'Documentation & Support Quality',sev:'low',freq:12,segment:'Developers',churnRisk:'Medium',quote:'SSO documentation is 2 years outdated. Spent 2 days on config.',samples:['Outdated docs','Slow support','Self-serve gaps']},
+  ]:[
+    {name:'Login & OTP Friction',sev:'high',freq:42,segment:'Android Users',churnRisk:'Very High',quote:'OTP takes 40+ seconds to arrive and sometimes never does. Missed commute music 3 times.',samples:['OTP delivery failure','Session timeouts','Login loops']},
+    {name:'App Crashes & Offline Bugs',sev:'high',freq:38,segment:'Mobile Users',churnRisk:'High',quote:'App crashes every time I try to download songs for offline. Paid for premium.',samples:['Offline playback failure','iOS 17 crash','Storage bloat']},
+    {name:'Notification Spam',sev:'med',freq:24,segment:'Power Users',churnRisk:'Medium',quote:'Getting 5-6 push notifications per day even with most turned off.',samples:['Push spam','Email overload','Permission overreach']},
+    {name:'Missing Content & Features',sev:'med',freq:21,segment:'Regional Users',churnRisk:'Medium',quote:'Almost nothing in my regional language. Need more Tamil and Telugu content.',samples:['Regional content gap','No collaborative playlists','No sleep timer']},
+    {name:'Pricing & Value Perception',sev:'med',freq:18,segment:'Students',churnRisk:'High',quote:'Premium price increased without adding features. Hard to justify.',samples:['Price hike frustration','Ad experience on premium','Competitor comparison']},
+    {name:'UI & Navigation Changes',sev:'low',freq:14,segment:'Long-term Users',churnRisk:'Medium',quote:'The new UI update completely ruined my workflow. Please revert.',samples:['Queue feature removed','New layout confusion','Accessibility issues']},
+  ];
+
+  // Features
+  const features=isFintech?[
+    {name:'UPI Autopay for Recurring Bills',desc:'Auto-pay subscriptions and utilities monthly',impact:92,effort:45,priority:96,demand:1840,rice:89,moscow:'must',sprint:true,retentionImpact:'+18% retention'},
+    {name:'Bill Splitting with Friends',desc:'Split restaurant bills and shared expenses',impact:85,effort:55,priority:88,demand:1640,rice:82,moscow:'must',sprint:true,retentionImpact:'+14% engagement'},
+    {name:'Biometric Login Restore',desc:'Restore fingerprint/face ID login removed in last update',impact:88,effort:25,priority:94,demand:1920,rice:91,moscow:'must',sprint:true,retentionImpact:'+22% D7 retention'},
+    {name:'Dark Mode',desc:'Full dark theme for night banking',impact:72,effort:30,priority:80,demand:2100,rice:78,moscow:'should',sprint:false,retentionImpact:'+9% app rating'},
+    {name:'Real-time Fraud Alerts',desc:'Smart fraud detection with manual override option',impact:80,effort:70,priority:74,demand:1200,rice:69,moscow:'should',sprint:false,retentionImpact:'+12% trust score'},
+    {name:'Statement Export (CSV/PDF)',desc:'Download transaction history in multiple formats',impact:65,effort:20,priority:82,demand:980,rice:76,moscow:'could',sprint:false,retentionImpact:'+7% power user retention'},
+  ]:isSaas?[
+    {name:'Role-Based Access Control (RBAC)',desc:'Granular permissions per user and team role',impact:95,effort:65,priority:91,demand:2840,rice:92,moscow:'must',sprint:true,retentionImpact:'+28% enterprise retention'},
+    {name:'Audit Log & Compliance Export',desc:'Full data access log for compliance teams',impact:88,effort:50,priority:88,demand:1940,rice:86,moscow:'must',sprint:true,retentionImpact:'+24% enterprise upsell'},
+    {name:'Webhook Retry & Failure Alerts',desc:'Automatic retry with failure notifications',impact:82,effort:35,priority:90,demand:1620,rice:88,moscow:'must',sprint:true,retentionImpact:'+19% developer NPS'},
+    {name:'Bulk Export (Unlimited Records)',desc:'Remove 500-record cap on data exports',impact:78,effort:40,priority:84,demand:1380,rice:82,moscow:'should',sprint:false,retentionImpact:'+22% large team retention'},
+    {name:'Time Zone Support for Scheduling',desc:'Per-user and per-team time zone configuration',impact:74,effort:45,priority:78,demand:1280,rice:75,moscow:'should',sprint:false,retentionImpact:'+16% international retention'},
+    {name:'Mobile App Feature Parity',desc:'Workflow approvals and full PM on mobile',impact:80,effort:80,priority:70,demand:1640,rice:68,moscow:'could',sprint:false,retentionImpact:'+18% mobile user retention'},
+  ]:[
+    {name:'Offline Download Fix (Android)',desc:'Fix crash on offline download for Android 13+',impact:94,effort:30,priority:97,demand:3200,rice:94,moscow:'must',sprint:true,retentionImpact:'+24% premium retention'},
+    {name:'Google One-Tap Auth (OTP Alternative)',desc:'Eliminate OTP friction with Google auth',impact:90,effort:35,priority:96,demand:2800,rice:93,moscow:'must',sprint:true,retentionImpact:'+18% activation rate'},
+    {name:'Collaborative Playlists',desc:'Real-time collaborative playlist editing with friends',impact:82,effort:50,priority:85,demand:2400,rice:84,moscow:'must',sprint:true,retentionImpact:'+21% social engagement'},
+    {name:'Sleep Timer',desc:'Auto-stop playback after set duration',impact:75,effort:15,priority:90,demand:2600,rice:88,moscow:'should',sprint:false,retentionImpact:'+14% night-time users'},
+    {name:'Advanced Equalizer',desc:'Parametric EQ with genre presets for audiophiles',impact:68,effort:55,priority:72,demand:1800,rice:70,moscow:'should',sprint:false,retentionImpact:'+12% power user retention'},
+    {name:'Regional Language Content',desc:'Expand Tamil, Telugu, Kannada, Bengali catalogs',impact:78,effort:80,priority:65,demand:1600,rice:60,moscow:'could',sprint:false,retentionImpact:'+34% regional DAU'},
+    {name:'In-Car Lyrics View',desc:'Simplified lyrics display for car mode',impact:62,effort:25,priority:76,demand:1200,rice:72,moscow:'could',sprint:false,retentionImpact:'+8% session length'},
+    {name:'Smart Notification Controls',desc:'Per-category push notification frequency caps',impact:70,effort:20,priority:84,demand:2100,rice:80,moscow:'should',sprint:false,retentionImpact:'+16% notification opt-in rate'},
+  ];
+
+  // Personas
+  const personas=isFintech?[
+    {emoji:'👨‍💼',name:'Salaried Professional',role:'Urban Working Adult · 28-38',pains:'Transaction failures on salary day, refund delays, account lockouts',features:'UPI autopay, instant refunds, instant statements',churnLikelihood:45,spendPotential:'High — ₹5K-20K/mo transactions'},
+    {emoji:'📱',name:'Digital Native',role:'Young Urban User · 22-28',pains:'Slow KYC, biometric login removed, app crashes, no dark mode',features:'Instant KYC, biometric auth, UX polish',churnLikelihood:62,spendPotential:'Medium — growing financial journey'},
+    {emoji:'🏢',name:'Small Business Owner',role:'SMB Operator · 32-45',pains:'Transaction limits, no proper export, bulk payment issues',features:'Bulk pay, CSV export, GST compliance',churnLikelihood:35,spendPotential:'Very High — ₹50K+ monthly volume'},
+    {emoji:'👩‍🎓',name:'College Student',role:'Student User · 18-24',pains:'Confusing UI, high pricing, hidden fees, limited cashback',features:'Simplified UI, student pricing, clear offers',churnLikelihood:75,spendPotential:'Low now → High future value'},
+  ]:isSaas?[
+    {emoji:'👩‍💻',name:'Product Manager',role:'Mid-Senior PM · 28-38',pains:'Slow dashboard, missing mobile features, API unreliability',features:'Fast analytics, mobile parity, reliable integrations',churnLikelihood:30,spendPotential:'High — decision maker, team budget'},
+    {emoji:'🏢',name:'Enterprise Admin',role:'IT Admin / Security · 30-45',pains:'No RBAC, no audit log, limited SSO, compliance gaps',features:'RBAC, audit log, SSO, advanced security',churnLikelihood:55,spendPotential:'Very High — enterprise contract value'},
+    {emoji:'⚙️',name:'Developer / Integrator',role:'Backend Dev · 25-35',pains:'Webhook failures, API rate limits, outdated docs',features:'Reliable webhooks, higher limits, great docs',churnLikelihood:65,spendPotential:'High — champions internal adoption'},
+    {emoji:'📊',name:'Finance / Ops',role:'Finance / Ops · 30-45',pains:'Surprise billing, no audit trail, export issues',features:'Transparent billing, usage alerts, bulk export',churnLikelihood:40,spendPotential:'High — controls procurement'},
+  ]:[
+    {emoji:'🎵',name:'Music Enthusiast',role:'Power Listener · 22-32',pains:'Audio quality, equalizer missing, offline bugs, UI changes',features:'Advanced EQ, hi-fi audio, reliable offline',churnLikelihood:28,spendPotential:'High — premium subscriber'},
+    {emoji:'👨‍🎓',name:'Student User',role:'Student · 18-24',pains:'Price sensitivity, student plan value, limited regional content',features:'Student discounts, regional content, collaborative playlists',churnLikelihood:72,spendPotential:'Medium — price sensitive but loyal if retained'},
+    {emoji:'🚗',name:'Commuter',role:'Daily Commuter · 26-38',pains:'OTP login delays, offline failures, car view issues',features:'Quick login, reliable offline, car mode',churnLikelihood:45,spendPotential:'High — daily active user'},
+    {emoji:'🌍',name:'Regional User',role:'Tier-2/3 City User · 20-35',pains:'OTP delays (network issues), regional content gaps, slow app',features:'Regional catalogs, Google auth, performance',churnLikelihood:68,spendPotential:'Growing — large addressable market'},
+  ];
+
+  // Churn risks
+  const churnRisks=isFintech?[
+    {title:'Transaction Failure During Critical Moments',risk:82,urgency:'CRITICAL',driver:'Salary/rent payment failures cause immediate trust collapse',retention:'Real-time retry logic + instant notification + proactive support'},
+    {title:'KYC Rejection Loop Without Resolution',risk:74,urgency:'HIGH',driver:'New users blocked for days — first impression destroyed permanently',retention:'Human-in-the-loop KYC review within 4h SLA'},
+    {title:'Cashback Promise Not Delivered',risk:68,urgency:'HIGH',driver:'Core product promise broken — damages trust irreparably for price-conscious users',retention:'Automated cashback status updates + SLA guarantees'},
+    {title:'Account Lockout with No Recovery Path',risk:60,urgency:'HIGH',driver:'Complete loss of service access triggers competitor migration',retention:'24/7 emergency account recovery flow'},
+  ]:isSaas?[
+    {title:'Silent Integration Failures Causing Data Loss',risk:88,urgency:'CRITICAL',driver:'Enterprise customers lose business-critical data without knowing — triggers immediate escalation',retention:'Sync health dashboard + proactive failure alerts'},
+    {title:'Export Limitations Blocking Core Workflows',risk:76,urgency:'HIGH',driver:'Large teams literally cannot use the product for their use case',retention:'Lift export cap to 100K rows immediately'},
+    {title:'40% Price Increase Without Value Addition',risk:72,urgency:'HIGH',driver:'Value-to-price ratio now below competitor threshold for many accounts',retention:'Add 2 enterprise features before next billing cycle'},
+    {title:'No RBAC Blocking Enterprise Expansion',risk:64,urgency:'HIGH',driver:'Deal blocker for 60%+ of enterprise prospects — caps growth ceiling',retention:'RBAC v1 in Q3 — unlock enterprise motion'},
+  ]:[
+    {title:'OTP Failure Blocking Daily Usage',risk:78,urgency:'CRITICAL',driver:'Commuters who can\'t access the app in the morning switch to competitors that day',retention:'Google One-tap auth as immediate OTP alternative'},
+    {title:'Offline Download Broken on Premium Plan',risk:72,urgency:'HIGH',driver:'Core premium value proposition broken — direct cause of cancellations',retention:'Hotfix Android 13 offline in current sprint'},
+    {title:'Student Segment Churning at 72%',risk:68,urgency:'HIGH',driver:'Price sensitivity spikes at semester-end — no pause mechanism',retention:'Student Pause feature + win-back at semester start'},
+    {title:'Regional Content Gap Driving Tier-2 Churn',risk:56,urgency:'MED',driver:'Tier-2/3 users find insufficient content in native language',retention:'Fast-track 3 regional catalogs by Q3'},
+  ];
+
+  // Health score
+  const healthScore=Math.round(posPct*0.4+satScore*0.3+(100-negPct)*0.3);
+  const healthVerdict=healthScore>=75?'Healthy with Growth Opportunities':healthScore>=55?'Needs Attention — Clear Action Items':healthScore>=35?'At Risk — Urgent Fixes Required':'Critical — Immediate Action Needed';
+  const healthColor=healthScore>=75?'#10b981':healthScore>=55?'#f59e0b':healthScore>=35?'#ef4444':'#dc2626';
+
+  // PRD
+  const topCluster=clusters[0];
+  const prdText=`BACKGROUND / PROBLEM STATEMENT
+${productName} is experiencing significant user drop-off and churn attributable to ${topCluster.name}. Based on analysis of ${lines.length} user feedback items, this issue affects ${topCluster.freq}% of complaints and carries a "${topCluster.churnRisk}" churn risk classification.
+
+Current state: ${topCluster.quote}
+
+PROPOSED SOLUTION
+Implement an immediate resolution for ${topCluster.name} through a combination of:
+1. Root cause fix addressing the core technical failure
+2. User-facing fallback (${clusters[0].samples[0]} mitigation)
+3. Proactive communication to affected users
+4. Monitoring dashboard to detect recurrence
+
+USER STORIES
+• As a ${personas[0].role}, I want ${features[0].name.toLowerCase()} so that I can ${features[0].desc.toLowerCase()}.
+• As a ${personas[1].role}, I want reliable core functionality so that I can trust the product for daily use.
+• As a power user, I want to be notified proactively when issues occur so that I don't discover failures myself.
+
+SUCCESS METRICS
+• Primary: Reduce ${topCluster.name} complaints by 60% within 30 days of ship
+• Secondary: Improve satisfaction score from ${satScore} → ${Math.min(100,satScore+12)} (+12 pts)
+• Guardrail: No regression in existing positive metrics (positive sentiment currently ${posPct}%)
+• North Star: Reduce churn risk score for affected segment from ${churnRisks[0].risk}% → below 40%
+
+ROLLOUT & RISKS
+• Phase 1 (Week 1-2): Fix + internal testing
+• Phase 2 (Week 3): 10% canary rollout with monitoring
+• Phase 3 (Week 4): Full rollout + user communication
+
+Risks: Regression in adjacent features (mitigate: thorough regression testing); user expectation mismatch (mitigate: clear in-app changelog).
+
+EXPECTED IMPACT
+Revenue: +${features[0].retentionImpact} → ~$${Math.round(lines.length*12)}K ARR uplift over 90 days
+Retention: ${churnRisks[0].retention}
+User Trust: NPS improvement estimated +8-12 points`;
+
+  // Insight feed
+  const insights=[
+    {icon:'📱',color:'#ef444420',text:`Users on <strong>Android</strong> generate <strong>${Math.round(negPct*1.4)}% more complaints</strong> than iOS users, concentrated in ${clusters[0].name.toLowerCase()} and ${clusters[1].name.toLowerCase()}.`,impact:'High Churn Signal',meta:[`${Math.round(negPct*1.4)}% higher complaint rate`,`Affects ${clusters[0].segment} segment`]},
+    {icon:'⭐',color:'#f59e0b20',text:`<strong>${personas[1].name}</strong> are requesting <strong>${features[1].name}</strong> most frequently — ${features[1].demand.toLocaleString()} instances across feedback corpus.`,impact:'Feature Demand Signal',meta:[`RICE Score: ${features[1].rice}`,'Estimated +'+features[1].retentionImpact]},
+    {icon:'⚠️',color:'#ef444420',text:`<strong>${churnRisks[0].title}</strong> is the #1 predicted churn driver — <strong>${churnRisks[0].risk}% of at-risk users</strong> cite this as primary reason.`,impact:'Critical Retention Risk',meta:[`Urgency: ${churnRisks[0].urgency}`,churnRisks[0].retention]},
+    {icon:'🎯',color:'#10b98120',text:`<strong>${posPct}%</strong> of feedback is positive — users who mention <strong>"${posWords[Math.floor(Math.random()*posWords.length)]}"</strong> have 3.2× higher 90-day retention.`,impact:'Positive Signal',meta:['Leverage in marketing','Reinforces core loop']},
+    {icon:'💰',color:'#6366f120',text:`Fixing <strong>${features[0].name}</strong> alone is estimated to recover <strong>${features[0].retentionImpact}</strong> — highest ROI single action available.`,impact:'Revenue Opportunity',meta:[`Effort: ${features[0].effort}/100`,`Priority Score: ${features[0].priority}`]},
+    {icon:'👥',color:'#8b5cf620',text:`<strong>${personas[personas.length-1].name}</strong> shows <strong>${personas[personas.length-1].churnLikelihood}% churn likelihood</strong> — highest of all detected segments. Requires targeted retention intervention.`,impact:'Segment Alert',meta:[`Churn: ${personas[personas.length-1].churnLikelihood}%`,personas[personas.length-1].features.split(',')[0]]},
+    {icon:'📊',color:'#06b6d420',text:`Product Health Score is <strong>${healthScore}/100</strong> — classified as <strong>"${healthVerdict.split(' ')[0]}"</strong>. Addressing top 3 clusters would move score to ~${Math.min(100,healthScore+18)}/100.`,impact:'Health Benchmark',meta:[`Positive: ${posPct}%`,`Negative: ${negPct}%`]},
+    {icon:'🔥',color:'#f59e0b20',text:`<strong>${clusters[2].name}</strong> affects <strong>${clusters[2].freq}% of complaints</strong> — the "fastest win" given low effort + high user demand. Ship fix in current sprint.`,impact:'Fastest Win',meta:[`Cluster freq: ${clusters[2].freq}%`,`Churn risk: ${clusters[2].churnRisk}`]},
+    {icon:'📈',color:'#10b98120',text:`Users who leave positive feedback reference <strong>"recommendations"</strong> and <strong>"discovery"</strong> most — the core algorithm is a retention moat worth protecting in every sprint.`,impact:'Retention Moat',meta:['Protect at all costs','Key differentiator']},
+    {icon:'🌍',color:'#06b6d420',text:`<strong>${personas[personas.length-1].role}</strong> segment growing rapidly but underserved — <strong>${clusters[clusters.length-2].freq}% of their complaints</strong> are addressable with a single feature sprint.`,impact:'Growth Opportunity',meta:['Large addressable market','High impact, medium effort']},
+    {icon:'⚡',color:'#6366f120',text:`<strong>High Impact / Low Effort Matrix</strong>: Top pick is <strong>${features[2].name}</strong> (Impact ${features[2].impact}, Effort ${features[2].effort}) — best ROI action not yet in current sprint.`,impact:'PM Prioritisation',meta:[`RICE: ${features[2].rice}`,`MoSCoW: ${features[2].moscow.toUpperCase()}`]},
+    {icon:'🎪',color:'#ec489920',text:`<strong>Most Frustrating User Journey:</strong> New user → OTP failure on first login → ${clusters[0].name} → abandonment. Fixing login friction alone breaks this failure chain entirely.`,impact:'Journey Risk',meta:['First-session problem','Highest leverage fix']},
+  ];
+
+  // Roadmap
+  const roadmap={
+    immediate:clusters.filter(c=>c.sev==='high').map(c=>({title:`Fix: ${c.name}`,impact:'High',effort:'High',tag:'Bug Fix'})).concat([{title:features.find(f=>f.sprint)?.name||features[0].name,impact:'Very High',effort:'Medium',tag:'Feature'}]),
+    sprint:features.filter(f=>f.sprint).slice(1,4).map(f=>({title:f.name,impact:'High',effort:'Medium',tag:'Feature'})).concat([{title:'Notification frequency caps',impact:'Medium',effort:'Low',tag:'UX Fix'}]),
+    longterm:features.filter(f=>!f.sprint).slice(0,3).map(f=>({title:f.name,impact:'Medium',effort:'High',tag:'Feature'})).concat([{title:'Regional market expansion',impact:'High',effort:'Very High',tag:'Strategy'}]),
+  };
+
+  // Recommendations
+  const recs=[
+    {problem:clusters[0].name,problemSub:`${clusters[0].freq}% of complaints · ${clusters[0].churnRisk} churn risk`,rec:features[0].name,recNote:`RICE: ${features[0].rice} · Sprint-ready`,impactLabel:features[0].retentionImpact,impactClass:'imp-high',priority:'P1 · Ship Now',priClass:'pri-p1',outcomeNum:`+${Math.round(lines.length*0.18)} retained`,outcomeText:`${features[0].retentionImpact} in 30 days`},
+    {problem:clusters[1].name,problemSub:`${clusters[1].freq}% of complaints · ${clusters[1].churnRisk} churn risk`,rec:features[1].name,recNote:`RICE: ${features[1].rice} · High demand`,impactLabel:features[1].retentionImpact,impactClass:'imp-high',priority:'P1 · This Week',priClass:'pri-p1',outcomeNum:`+${Math.round(lines.length*0.12)} retained`,outcomeText:features[1].retentionImpact},
+    {problem:clusters[2].name,problemSub:`${clusters[2].freq}% of complaints · ${clusters[2].churnRisk} churn risk`,rec:features[2].name,recNote:`RICE: ${features[2].rice} · Fast win`,impactLabel:features[2].retentionImpact,impactClass:'imp-med',priority:'P2 · Next Sprint',priClass:'pri-p2',outcomeNum:`+${Math.round(lines.length*0.09)} retained`,outcomeText:features[2].retentionImpact},
+    {problem:'Negative sentiment trend',problemSub:`${negPct}% negative feedback · satisfaction score ${satScore}/100`,rec:'Launch proactive support outreach to at-risk users',recNote:'Email + in-app · based on complaint keywords',impactLabel:'+12pt satisfaction',impactClass:'imp-med',priority:'P2 · Next Sprint',priClass:'pri-p2',outcomeNum:`Sat score: ${Math.min(100,satScore+12)}`,outcomeText:'Estimated NPS +8 points'},
+    {problem:`${personas[personas.length-1].name} churn risk`,problemSub:`${personas[personas.length-1].churnLikelihood}% churn likelihood · highest segment`,rec:`Dedicated ${personas[personas.length-1].name.toLowerCase()} retention campaign`,recNote:'Personalised offer + feature preview',impactLabel:`-${Math.round(personas[personas.length-1].churnLikelihood*0.3)}% segment churn`,impactClass:'imp-low',priority:'P3 · Backlog',priClass:'pri-p3',outcomeNum:`+${Math.round(lines.length*0.06)} retained`,outcomeText:'Long-term LTV improvement'},
+  ];
+
+  return {productName,lines:lines.length,pos:posPct,neg:negPct,neu:neuPct,satScore,clusters,features,personas,churnRisks,healthScore,healthVerdict,healthColor,prdText,insights,roadmap,recs,text};
+}
+
+
+// RENDER ALL VIEWS
+
+function renderAll(d){
+  renderSummary(d);
+  renderSentiment(d);
+  renderClusters(d);
+  renderFeatures(d);
+  renderPersonas(d);
+  renderRoadmap(d);
+  renderChurnRisk(d);
+  renderHealth(d);
+  renderPRD(d);
+  renderFeed(d);
+}
+
+function renderSummary(d){
+  const recs=d.recs.map(r=>`<tr>
+    <td><div class="rec-problem">${r.problem}</div><div class="rec-problem-sub">${r.problemSub}</div></td>
+    <td><div class="rec-rec">${r.rec}<em>${r.recNote}</em></div></td>
+    <td><span class="impact-pill ${r.impactClass}">${r.impactLabel}</span></td>
+    <td><span class="pri-badge ${r.priClass}">${r.priority}</span></td>
+    <td><div class="outcome-num">${r.outcomeNum}</div><div class="outcome-text">${r.outcomeText}</div></td>
+  </tr>`).join('');
+
+  document.getElementById('summaryContent').innerHTML=`
+    <div class="kpi-row">
+      <div class="kc kc-indigo"><div class="kc-lbl">Feedback Items</div><div class="kc-val" style="color:#818cf8">${d.lines}</div><div class="kc-sub">analysed by AI</div></div>
+      <div class="kc kc-green"><div class="kc-lbl">Positive Sentiment</div><div class="kc-val" style="color:var(--green)">${d.pos}%</div><div class="kc-sub">of all feedback</div></div>
+      <div class="kc kc-red"><div class="kc-lbl">Negative Sentiment</div><div class="kc-val" style="color:var(--red)">${d.neg}%</div><div class="kc-sub">pain & complaints</div></div>
+      <div class="kc kc-amber"><div class="kc-lbl">Satisfaction Score</div><div class="kc-val" style="color:var(--amber)">${d.satScore}/100</div><div class="kc-sub">composite score</div></div>
+      <div class="kc kc-violet"><div class="kc-lbl">Pain Clusters</div><div class="kc-val" style="color:#a78bfa">${d.clusters.length}</div><div class="kc-sub">identified groups</div></div>
+      <div class="kc kc-cyan"><div class="kc-lbl">Product Health</div><div class="kc-val" style="color:var(--cyan)">${d.healthScore}/100</div><div class="kc-sub">${d.healthVerdict.split(' ')[0]}</div></div>
+    </div>
+
+    <div style="background:#06080e;border:1px solid #6366f122;border-radius:var(--r2);padding:18px 20px;margin-bottom:18px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,#6366f115,transparent 70%);pointer-events:none"></div>
+      <div style="font-size:10px;font-family:'DM Mono',monospace;color:#818cf8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:5px"><span>⬢</span> AI EXECUTIVE SUMMARY</div>
+      <div style="font-size:13px;color:#a8c0d8;line-height:1.8">
+        <strong style="color:var(--text)">Overall health: ${d.healthVerdict}.</strong> Analysis of ${d.lines} feedback items reveals the #1 pain point is <strong style="color:var(--text)">${d.clusters[0].name}</strong> (${d.clusters[0].freq}% of complaints, ${d.clusters[0].churnRisk} churn risk). 
+        Top requested feature: <strong style="color:var(--text)">${d.features[0].name}</strong> (RICE: ${d.features[0].rice}). 
+        Retention risk warning: <strong style="color:var(--red)">${d.churnRisks[0].title}</strong> — ${d.churnRisks[0].risk}% of at-risk users cite this.
+        <br><br><strong style="color:var(--green)">⚡ Fastest win:</strong> ${d.features.find(f=>f.sprint)?.name||d.features[0].name} — RICE ${d.features[0].rice}, ship-ready, no further research needed. Estimated impact: ${d.features[0].retentionImpact}.
+        <br><strong style="color:#818cf8">◈ Recommended action:</strong> ${d.churnRisks[0].retention}.
+      </div>
+    </div>
+
+    <div class="rec-section">
+      <div class="rec-hd">
+        <div class="rec-title-row">Recommended Actions · Ranked by Impact</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">AI-generated from ${d.lines} feedback items</div>
+      </div>
+      <div class="rec-table-wrap">
+        <table class="rec-table">
+          <thead><tr><th>Problem</th><th>Recommendation</th><th>Expected Impact</th><th>Priority</th><th>Business Outcome</th></tr></thead>
+          <tbody>${recs}</tbody>
+        </table>
+      </div>
+    </div>`;
+  document.getElementById('summaryMeta').textContent=`${d.productName} · ${d.lines} items · AI-generated`;
+}
+
+let sentimentChartsRendered=false;
+function renderSentiment(d){
+  document.getElementById('sentimentMeta').textContent=`${d.pos}% positive · ${d.neg}% negative · ${d.neu}% neutral`;
+  const emotions=[
+    {lbl:'Frustration',pct:d.neg,color:'#ef4444'},{lbl:'Satisfaction',pct:d.pos,color:'#10b981'},
+    {lbl:'Confusion',pct:Math.round(d.neg*0.6),color:'#f59e0b'},{lbl:'Delight',pct:Math.round(d.pos*0.7),color:'#6366f1'},
+    {lbl:'Disappointment',pct:Math.round(d.neg*0.8),color:'#ec4899'},{lbl:'Trust',pct:Math.round(d.pos*0.5),color:'#06b6d4'},
+  ];
+  document.getElementById('sentimentContent').innerHTML=`
+    <div class="kpi-row">
+      <div class="kc kc-green"><div class="kc-lbl">Positive</div><div class="kc-val" style="color:var(--green)">${d.pos}%</div><div class="kc-sub">happy users</div></div>
+      <div class="kc kc-indigo"><div class="kc-lbl">Neutral</div><div class="kc-val" style="color:#818cf8">${d.neu}%</div><div class="kc-sub">mixed / unclear</div></div>
+      <div class="kc kc-red"><div class="kc-lbl">Negative</div><div class="kc-val" style="color:var(--red)">${d.neg}%</div><div class="kc-sub">pain points</div></div>
+      <div class="kc kc-amber"><div class="kc-lbl">Satisfaction</div><div class="kc-val" style="color:var(--amber)">${d.satScore}</div><div class="kc-sub">out of 100</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="cc">
+        <div class="cc-hd"><div><div class="cc-title">Sentiment Distribution</div><div class="cc-sub">Overall feedback tone breakdown</div></div></div>
+        <div style="position:relative;height:200px"><canvas id="sentChart1"></canvas></div>
+      </div>
+      <div class="cc">
+        <div class="cc-hd"><div><div class="cc-title">Emotion Breakdown</div><div class="cc-sub">Detected emotional signals</div></div></div>
+        ${emotions.map(e=>`<div class="sent-bar-wrap"><div class="sb-row"><span class="sb-lbl">${e.lbl}</span><span class="sb-pct">${e.pct}%</span></div><div class="sb-bg"><div class="sb-fill" style="width:${e.pct}%;background:${e.color}"></div></div></div>`).join('')}
+      </div>
+      <div class="cc full">
+        <div class="cc-hd"><div><div class="cc-title">Sentiment Over Time (Simulated)</div><div class="cc-sub">Positive vs Negative trend — last 12 weeks</div></div><span class="pill pill-g">Positive trend</span></div>
+        <div style="position:relative;height:200px"><canvas id="sentChart2"></canvas></div>
+      </div>
+    </div>`;
+  setTimeout(()=>renderSentimentCharts(),80);
+}
+
+function renderSentimentCharts(){
+  if(!analysisData)return;
+  const d=analysisData;
+  mkChart('sentChart1',{type:'doughnut',data:{labels:['Positive','Neutral','Negative'],datasets:[{data:[d.pos,d.neu,d.neg],backgroundColor:['#10b981','#6366f1','#ef4444'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#7c7f9a',font:{size:11}}},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'%'}}},cutout:'65%'}});
+  const weeks=['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'];
+  const base=d.pos;
+  mkChart('sentChart2',{type:'line',data:{labels:weeks,datasets:[
+    {label:'Positive',data:weeks.map((_,i)=>Math.max(10,Math.min(90,base+Math.sin(i*0.5)*8+(Math.random()-0.4)*10))),borderColor:'#10b981',backgroundColor:'#10b98112',tension:.4,fill:true,pointRadius:2,pointBackgroundColor:'#10b981'},
+    {label:'Negative',data:weeks.map((_,i)=>Math.max(5,Math.min(70,d.neg-Math.sin(i*0.4)*6+(Math.random()-0.5)*8))),borderColor:'#ef4444',backgroundColor:'#ef444410',tension:.4,fill:false,pointRadius:2,borderDash:[4,3],pointBackgroundColor:'#ef4444'},
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:GR,ticks:TK},y:{grid:GR,ticks:{...TK,callback:v=>v+'%'},min:0,max:100}}}});
+}
+
+function renderClusters(d){
+  document.getElementById('clusterMeta').textContent=`${d.clusters.length} clusters · AI-grouped from ${d.lines} items`;
+  const sevClass={high:'sev-high',med:'sev-med',low:'sev-low'};
+  document.getElementById('clustersContent').innerHTML=`
+    <div class="cluster-grid">
+      ${d.clusters.map(c=>`
+        <div class="cluster-card ${sevClass[c.sev]||''}">
+          <div class="cl-top">
+            <div class="cl-name">${c.name}</div>
+            <span class="cl-sev ${c.sev}">${c.sev.toUpperCase()}</span>
+          </div>
+          <div class="cl-meta">
+            <span class="cl-stat">📊 ${c.freq}% of complaints</span>
+            <span class="cl-stat">👥 ${c.segment}</span>
+          </div>
+          <div class="cl-quote">"${c.quote}"</div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            ${c.samples.map(s=>`<span style="font-size:10px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--muted);font-family:'DM Mono',monospace">${s}</span>`).join('')}
+          </div>
+          <div class="cl-churn"><span style="color:${c.churnRisk==='Very High'?'var(--red)':c.churnRisk==='High'?'var(--amber)':'var(--green)'}">▲</span> Churn Risk: <strong style="color:var(--text)">${c.churnRisk}</strong></div>
+        </div>`).join('')}
+    </div>
+    <div class="rec-section">
+      <div class="rec-hd"><div class="rec-title-row">Pain Point Action Plan</div><div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Ordered by churn risk</div></div>
+      <div class="rec-table-wrap">
+        <table class="rec-table">
+          <thead><tr><th>Problem</th><th>Recommendation</th><th>Expected Impact</th><th>Priority</th><th>Business Outcome</th></tr></thead>
+          <tbody>${d.recs.slice(0,4).map(r=>`<tr>
+            <td><div class="rec-problem">${r.problem}</div><div class="rec-problem-sub">${r.problemSub}</div></td>
+            <td><div class="rec-rec">${r.rec}<em>${r.recNote}</em></div></td>
+            <td><span class="impact-pill ${r.impactClass}">${r.impactLabel}</span></td>
+            <td><span class="pri-badge ${r.priClass}">${r.priority}</span></td>
+            <td><div class="outcome-num">${r.outcomeNum}</div><div class="outcome-text">${r.outcomeText}</div></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderFeatures(d){
+  document.getElementById('featuresContent').innerHTML=`
+    <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap">
+      <span class="pill pill-g">${d.features.filter(f=>f.moscow==='must').length} Must Have</span>
+      <span class="pill pill-a">${d.features.filter(f=>f.moscow==='should').length} Should Have</span>
+      <span class="pill pill-i">${d.features.filter(f=>f.moscow==='could').length} Could Have</span>
+      <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;align-self:center;margin-left:8px">${d.features.filter(f=>f.sprint).length} recommended for next sprint</span>
+    </div>
+    <div class="feat-table-wrap">
+      <table class="feat-table">
+        <thead><tr><th>Feature</th><th>RICE Score</th><th>Impact</th><th>Effort</th><th>Demand</th><th>Retention Impact</th><th>MoSCoW</th></tr></thead>
+        <tbody>${d.features.map(f=>{
+          const sc=f.rice;
+          const scColor=sc>=85?'#10b981':sc>=70?'#f59e0b':'#ef4444';
+          const mClass={must:'moscow-must',should:'moscow-should',could:'moscow-could',wont:'moscow-wont'}[f.moscow]||'moscow-could';
+          return `<tr>
+            <td>
+              <div class="feat-name">${f.name}${f.sprint?` <span class="sprint-badge">Next Sprint</span>`:''}</div>
+              <div class="feat-desc">${f.desc}</div>
+            </td>
+            <td><div class="score-ring-sm" style="background:${scColor}20;color:${scColor};border:2px solid ${scColor}40">${sc}</div></td>
+            <td><span style="font-size:12px;font-family:'DM Mono',monospace;color:${f.impact>=80?'var(--green)':f.impact>=60?'var(--amber)':'var(--muted)'}">${f.impact}/100</span></td>
+            <td><span style="font-size:12px;font-family:'DM Mono',monospace;color:${f.effort<=40?'var(--green)':f.effort<=65?'var(--amber)':'var(--red)'}">${f.effort}/100</span></td>
+            <td><span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--muted)">${f.demand.toLocaleString()}</span></td>
+            <td><span class="pill pill-g" style="font-size:10px">${f.retentionImpact}</span></td>
+            <td><span class="moscow-badge ${mClass}">${f.moscow.toUpperCase()}</span></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderPersonas(d){
+  const churnColor=v=>v>=70?'var(--red)':v>=45?'var(--amber)':'var(--green)';
+  document.getElementById('personasContent').innerHTML=`
+    <div class="persona-grid">
+      ${d.personas.map(p=>`
+        <div class="persona-card">
+          <div class="persona-emoji">${p.emoji}</div>
+          <div class="persona-name">${p.name}</div>
+          <div class="persona-role">${p.role}</div>
+          <div class="persona-attr"><strong>Top pains:</strong> ${p.pains}</div>
+          <div class="persona-attr"><strong>Desired features:</strong> ${p.features}</div>
+          <div class="persona-attr"><strong>Spending potential:</strong> ${p.spendPotential}</div>
+          <div style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;color:var(--muted)">Churn likelihood</span>
+              <span style="font-size:11px;font-family:'DM Mono',monospace;color:${churnColor(p.churnLikelihood)}">${p.churnLikelihood}%</span>
+            </div>
+            <div class="persona-churn-bar"><div class="persona-churn-fill" style="width:${p.churnLikelihood}%;background:${churnColor(p.churnLikelihood)}"></div></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderRoadmap(d){
+  const kanbanCol=(title,color,items)=>`
+    <div class="kanban-col">
+      <div class="kanban-hd"><span class="kanban-dot" style="background:${color}"></span>${title}</div>
+      ${items.map(item=>`
+        <div class="kanban-item">
+          <div class="ki-title">${item.title}</div>
+          <div class="ki-meta">
+            <span class="ki-impact" style="color:${item.impact==='Very High'||item.impact==='High'?'var(--green)':'var(--amber)'}">${item.impact} Impact</span>
+            <span style="color:var(--muted2)">·</span>
+            <span style="color:var(--muted)">${item.effort} Effort</span>
+            <span style="color:var(--muted2)">·</span>
+            <span style="background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:10px;color:var(--muted)">${item.tag}</span>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  document.getElementById('roadmapContent').innerHTML=`
+    <div class="kanban">
+      ${kanbanCol('🔴 Immediate Fixes','#ef4444',d.roadmap.immediate)}
+      ${kanbanCol('🟡 Next Sprint','#f59e0b',d.roadmap.sprint)}
+      ${kanbanCol('🟢 Long-term','#10b981',d.roadmap.longterm)}
+    </div>`;
+}
+
+function renderChurnRisk(d){
+  const urgencyClass={CRITICAL:'pri-p1',HIGH:'pri-p2',MED:'pri-p3'};
+  const barColor=v=>v>=75?'#ef4444':v>=55?'#f59e0b':'#10b981';
+  document.getElementById('churnriskContent').innerHTML=`
+    <div class="churn-risk-grid">
+      ${d.churnRisks.map(c=>`
+        <div class="cr-card">
+          <div class="cr-top" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px">
+            <div class="cr-title">${c.title}</div>
+            <span class="urgency-badge ${urgencyClass[c.urgency]||'pri-p3'}" style="flex-shrink:0">${c.urgency}</span>
+          </div>
+          <div class="cr-sub">${c.driver}</div>
+          <div class="cr-pct" style="color:${barColor(c.risk)}">${c.risk}%</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">churn probability</div>
+          <div class="cr-bar-bg"><div class="cr-bar-fill" style="width:${c.risk}%;background:${barColor(c.risk)}"></div></div>
+          <div style="margin-top:10px;font-size:11px;color:var(--green);background:var(--green-dim);border:1px solid #10b98115;padding:6px 10px;border-radius:6px">⚡ ${c.retention}</div>
+        </div>`).join('')}
+    </div>
+    <div class="rec-section">
+      <div class="rec-hd"><div class="rec-title-row">Retention Intervention Playbook</div></div>
+      <div class="rec-table-wrap">
+        <table class="rec-table">
+          <thead><tr><th>Problem</th><th>Recommendation</th><th>Expected Impact</th><th>Priority</th><th>Business Outcome</th></tr></thead>
+          <tbody>${d.recs.slice(0,4).map(r=>`<tr>
+            <td><div class="rec-problem">${r.problem}</div><div class="rec-problem-sub">${r.problemSub}</div></td>
+            <td><div class="rec-rec">${r.rec}<em>${r.recNote}</em></div></td>
+            <td><span class="impact-pill ${r.impactClass}">${r.impactLabel}</span></td>
+            <td><span class="pri-badge ${r.priClass}">${r.priority}</span></td>
+            <td><div class="outcome-num">${r.outcomeNum}</div><div class="outcome-text">${r.outcomeText}</div></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderHealth(d){
+  const C=283,off=C*(1-d.healthScore/100);
+  document.getElementById('healthContent').innerHTML=`
+    <div class="health-hero">
+      <div class="health-ring">
+        <svg width="120" height="120" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#1a1e35" stroke-width="6"/><circle cx="50" cy="50" r="45" fill="none" stroke="${d.healthColor}" stroke-width="6" stroke-dasharray="${C}" stroke-dashoffset="${off}" stroke-linecap="round" transform="rotate(-90 50 50)"/></svg>
+        <div class="health-center"><div class="health-score-num" style="color:${d.healthColor}">${d.healthScore}</div><div class="health-score-lbl">/100</div></div>
+      </div>
+      <div class="health-body">
+        <div class="health-verdict" style="color:${d.healthColor}">${d.healthVerdict}</div>
+        <div class="health-summary">Based on ${d.lines} feedback items. Positive sentiment: <strong>${d.pos}%</strong>. Primary risk: <strong>${d.clusters[0].name}</strong>. Top retention opportunity: <strong>${d.features[0].name}</strong>.</div>
+        <div class="health-tags">
+          <span class="pill ${d.pos>60?'pill-g':'pill-r'}">Sentiment ${d.pos>60?'Healthy':'At Risk'}</span>
+          <span class="pill ${d.clusters.filter(c=>c.sev==='high').length<=2?'pill-a':'pill-r'}">${d.clusters.filter(c=>c.sev==='high').length} High-Sev Clusters</span>
+          <span class="pill pill-i">FM Fit: ${d.healthScore>=65?'Good':'Needs Work'}</span>
+          <span class="pill ${d.churnRisks[0].risk<60?'pill-a':'pill-r'}">Churn Risk: ${d.churnRisks[0].risk}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="cc">
+        <div class="cc-hd"><div><div class="cc-title">Health Dimension Scores</div><div class="cc-sub">Across 6 product health dimensions</div></div></div>
+        <div style="position:relative;height:230px"><canvas id="healthRadar"></canvas></div>
+      </div>
+      <div class="cc">
+        <div class="cc-hd"><div><div class="cc-title">Risk Breakdown</div><div class="cc-sub">By category</div></div></div>
+        <div style="position:relative;height:230px"><canvas id="healthBar"></canvas></div>
+      </div>
+    </div>`;
+  setTimeout(()=>{
+    mkChart('healthRadar',{type:'radar',data:{labels:['Sentiment','Retention','Feature-Market Fit','Performance','Support','Engagement'],datasets:[{data:[d.pos,100-d.churnRisks[0].risk,d.healthScore,Math.round(d.pos*0.8),Math.round((100-d.neg)*0.7),Math.round(d.pos*0.9)],borderColor:'#6366f1',backgroundColor:'#6366f115',pointBackgroundColor:'#6366f1',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{grid:{color:'#ffffff08'},ticks:{display:false},pointLabels:{color:'#7c7f9a',font:{size:11}},min:0,max:100}}}});
+    mkChart('healthBar',{type:'bar',data:{labels:['Churn Risk','Complaint Volume','Negative Sent.','Missing Features','Support Backlog'],datasets:[{data:[d.churnRisks[0].risk,d.neg,d.neg,Math.round(d.neg*0.7),Math.round(d.neg*0.5)],backgroundColor:['#ef4444','#f59e0b','#ef444480','#6366f1','#8b5cf6'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:GR,ticks:{...TK,callback:v=>v+'%'},max:100},y:{grid:{display:false},ticks:TK}}}});
+  },80);
+}
+
+function renderPRD(d){
+  document.getElementById('prdContent').innerHTML=`
+    <div class="prd-wrap">
+      <div class="prd-hd">
+        <div class="prd-title"><span style="color:#818cf8">⬡</span> Mini PRD — ${d.clusters[0].name}</div>
+        <div class="prd-actions">
+          <button class="prd-btn" onclick="copyPRD()">Copy PRD</button>
+          <button class="prd-btn" onclick="exportReport()">Export</button>
+        </div>
+      </div>
+      <div class="prd-body" id="prdBodyText">${d.prdText.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^(BACKGROUND|PROPOSED SOLUTION|USER STORIES|SUCCESS METRICS|ROLLOUT|EXPECTED IMPACT)/gm,'<strong style="color:var(--text)">$1</strong>')}</div>
+    </div>`;
+}
+
+function renderFeed(d){
+  document.getElementById('feedContent').innerHTML=`
+    <div class="cc full">
+      ${d.insights.map(ins=>`
+        <div class="feed-item">
+          <div class="feed-icon" style="background:${ins.color}">${ins.icon}</div>
+          <div class="feed-content">
+            <div class="feed-text">${ins.text}</div>
+            <div class="feed-meta">
+              <span class="feed-impact" style="color:#818cf8">${ins.impact}</span>
+              ${ins.meta.map(m=>`<span>${m}</span>`).join('')}
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+
+// EXPORT / SHARE
+
+function copyPRD(){
+  if(!analysisData)return;
+  navigator.clipboard.writeText(analysisData.prdText).then(()=>alert('PRD copied to clipboard!'));
+}
+function exportReport(){
+  if(!analysisData){alert('Run an analysis first to export a report.');return;}
+  const report=`InsightFlow AI Report\n=====================\nProduct: ${analysisData.productName}\nFeedback Items: ${analysisData.lines}\nSentiment: ${analysisData.pos}% positive, ${analysisData.neg}% negative\nHealth Score: ${analysisData.healthScore}/100\n\nTop Pain Points:\n${analysisData.clusters.map((c,i)=>`${i+1}. ${c.name} (${c.freq}% of complaints)`).join('\n')}\n\nTop Feature Requests:\n${analysisData.features.map((f,i)=>`${i+1}. ${f.name} — RICE: ${f.rice}`).join('\n')}\n\n${analysisData.prdText}`;
+  navigator.clipboard.writeText(report).then(()=>alert('Full report copied to clipboard!'));
+}
+function shareInsights(){
+  if(!analysisData){alert('Run an analysis first.');return;}
+  alert(`Insights sharing simulated!\n\nIn production, this would generate a shareable link to your InsightFlow workspace with read-only access for stakeholders.\n\nProduct: ${analysisData.productName}\nHealth Score: ${analysisData.healthScore}/100`);
+}
+</script>
+</body>
+</html>
