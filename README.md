@@ -169,13 +169,13 @@ This creates realistic PM/product operations simulations without requiring backe
 # Screenshots
 
 ## Executive Summary
-![InsightFlow Executive Summary](executive.png)
+![InsightFlow Executive Summary](.png)
 
 ## Sentiment Analytics Dashboard
-![InsightFlow Sentiment Dashboard](sentiment.png)
+![InsightFlow Sentiment Dashboard](executive.png)
 
 ## Pain Point Clustering
-![InsightFlow Pain Point Clusters](pain_clusters.png)
+![InsightFlow Pain Point Clusters](sentiment.png)
 
 
 
