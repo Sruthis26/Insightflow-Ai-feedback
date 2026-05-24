@@ -169,7 +169,7 @@ This creates realistic PM/product operations simulations without requiring backe
 # Screenshots
 
 ## Input Feedback Screen
-![InsightFlow Executive Summary](Input_.png)
+![InsightFlow Executive Summary](executive.png)
 
 
 ## Executive Summary
